@@ -1,0 +1,58 @@
+with open(encrypted_file, 'rb') as file:
+    encrypted_data = file.read()
+
+byte_frequency = {}
+for byte in encrypted_data:
+    if byte in byte_frequency:
+        byte_frequency[byte] += 1
+    else:
+        byte_frequency[byte] = 1
+
+print(byte_frequency)
+
+#===================================================
+
+from cryptography.fernet import Fernet
+import base64
+
+key = b'your_derived_key_here'
+
+cipher_suite = Fernet(base64.urlsafe_b64encode(key))
+
+with open(encrypted_file, 'rb') as file:
+    encrypted_data = file.read()
+
+decrypted_data = cipher_suite.decrypt(encrypted_data)
+
+print(decrypted_data)
+
+#===================================================
+
+from cryptography.fernet import Fernet
+import base64
+import hashlib
+import argparse
+
+parser = argparse.ArgumentParser(description="Encrypt a file using Fernet encryption")
+parser.add_argument('--file', required=True, help="Input file to encrypt")
+args = parser.parse_args()
+
+user_defined_password = "your_derived_key_here"
+
+salt = b'salt_value' 
+key = hashlib.pbkdf2_hmac('sha256', user_defined_password.encode(), salt, 100000)
+
+cipher_suite = Fernet(base64.urlsafe_b64encode(key))
+
+file_to_encrypt = args.file
+with open(file_to_encrypt, 'rb') as file:
+    file_contents = file.read()
+
+encrypted_data = cipher_suite.encrypt(file_contents)
+
+output_file = file_to_encrypt + ".cryptomesh"
+
+with open(output_file, 'wb') as file:
+    file.write(encrypted_data)
+
+print(f"File '{file_to_encrypt}' has been encrypted and saved as '{output_file}'.")
